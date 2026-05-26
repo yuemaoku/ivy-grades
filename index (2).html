@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>优藤国际学校 · 成绩管理系统</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--g:#397071;--gd:#2a5455;--gp:#eaf3f3;--gm:#f2f8f8;--ink:#1c2b2b;--mu:#7a9494;--bd:#c8dede;--bdl:#e4eeee;--gold:#c09b4a;--red:#c0392b;--rbg:#fdf3f2;--ybg:#fffbf0;--sh:0 2px 16px rgba(57,112,113,.10);--shl:0 8px 40px rgba(57,112,113,.16);--r:8px;--rs:4px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans','Noto Serif SC',sans-serif;background:var(--gm);color:var(--ink);min-height:100vh;font-size:14px}
+.hidden{display:none!important}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 18px;border-radius:var(--rs);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all .18s;white-space:nowrap}
+.bp{background:var(--g);color:#fff;border-color:var(--g)}.bp:hover{background:var(--gd)}
+.bo{background:#fff;color:var(--g);border-color:var(--g)}.bo:hover{background:var(--gp)}
+.bg2{background:transparent;color:var(--mu);border-color:var(--bd)}.bg2:hover{color:var(--g);border-color:var(--g);background:var(--gp)}
+.bd2{background:var(--rbg);color:var(--red);border-color:#e8b4b0}.bd2:hover{background:var(--red);color:#fff}
+.bsm{padding:5px 12px;font-size:12px}.bxs{padding:3px 8px;font-size:11px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:11px;font-weight:600;color:var(--mu);letter-spacing:.08em;text-transform:uppercase}
+.fi{padding:9px 12px;border:1.5px solid var(--bd);border-radius:var(--rs);font-family:inherit;font-size:13.5px;color:var(--ink);background:#fff;outline:none;transition:border .18s;width:100%}
+.fi:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(57,112,113,.1)}
+.fs{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23397071' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.card{background:#fff;border:1px solid var(--bdl);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.ch{padding:14px 20px;border-bottom:1px solid var(--bdl);display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--gm),#fff)}
+.ct{font-size:15px;font-weight:600;color:var(--ink);font-family:'Noto Serif SC',serif}
+.tag{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.tg{background:var(--gp);color:var(--gd)}.tgo{background:#fdf6e6;color:#8a6820}.tr{background:var(--rbg);color:var(--red)}
+#tw{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 18px;border-radius:var(--rs);font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.12);animation:sIn .25s ease;max-width:300px}
+.ts{background:var(--g);color:#fff}.te{background:var(--red);color:#fff}.ti{background:var(--ink);color:#fff}
+@keyframes sIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.mbk{position:fixed;inset:0;background:rgba(28,43,43,.45);backdrop-filter:blur(2px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.modal{background:#fff;border-radius:var(--r);width:100%;max-width:480px;box-shadow:var(--shl);animation:mIn .2s ease}
+@keyframes mIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.mh{padding:16px 22px;border-bottom:1px solid var(--bdl);display:flex;align-items:center;justify-content:space-between}
+.mtt{font-size:15px;font-weight:600;font-family:'Noto Serif SC',serif;color:var(--ink)}
+.mc{background:none;border:none;cursor:pointer;color:var(--mu);font-size:22px;line-height:1;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:4px}
+.mc:hover{background:var(--gp);color:var(--g)}
+.mb{padding:22px;display:flex;flex-direction:column;gap:14px;max-height:72vh;overflow-y:auto}
+.mf{padding:14px 22px;border-top:1px solid var(--bdl);display:flex;justify-content:flex-end;gap:10px}
+/* login */
+#pg-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,var(--gd),var(--g) 55%,#4d9e8f);padding:20px}
+.lcard{background:#fff;border-radius:12px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.28);overflow:hidden}
+.lhd{background:var(--g);padding:34px 30px 28px;text-align:center;position:relative;overflow:hidden}
+.lhd::before{content:'';position:absolute;top:-50px;right:-50px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.07)}
+.lring{width:64px;height:64px;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px}
+.lcn{font-family:'Noto Serif SC',serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:.22em}
+.len{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:rgba(255,255,255,.65);letter-spacing:.2em;margin-top:5px}
+.lsub{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.28em;margin-top:10px;text-transform:uppercase}
+.lbd{padding:28px 28px 20px;display:flex;flex-direction:column;gap:14px}
+.lft{padding:14px 28px;background:var(--gm);border-top:1px solid var(--bdl);text-align:center;font-size:10.5px;color:var(--mu)}
+/* app */
+#pg-app{display:flex;flex-direction:column;min-height:100vh}
+.tnav{background:var(--g);color:#fff;padding:0 22px;height:54px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(57,112,113,.3);position:sticky;top:0;z-index:100}
+.tnl{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;letter-spacing:.14em;color:#fff;line-height:1.2}
+.tnl small{font-family:'Playfair Display',serif;font-style:italic;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.2em;display:block;font-weight:400}
+.ndv{width:1px;height:22px;background:rgba(255,255,255,.18);flex-shrink:0}
+.ntb{padding:5px 13px;border-radius:18px;font-size:12.5px;font-weight:500;cursor:pointer;color:rgba(255,255,255,.72);transition:all .18s;border:none;background:transparent;font-family:inherit}
+.ntb:hover,.ntb.act{background:rgba(255,255,255,.18);color:#fff}
+.nusr{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.82)}
+.uav{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.blg{padding:4px 11px;border-radius:18px;border:1px solid rgba(255,255,255,.28);background:transparent;color:rgba(255,255,255,.78);font-size:11.5px;cursor:pointer;font-family:inherit;transition:all .18s}
+.blg:hover{background:rgba(255,255,255,.15);color:#fff}
+.apc{flex:1;padding:22px;max-width:1380px;margin:0 auto;width:100%}
+.ps{display:none}.ps.act{display:block}
+.pgh{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.pgh h2{font-family:'Noto Serif SC',serif;font-size:19px;font-weight:600;color:var(--ink)}
+.pgh p{font-size:12px;color:var(--mu);margin-top:2px}
+.fbar{background:#fff;border:1px solid var(--bdl);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;box-shadow:var(--sh)}
+.flbl{font-size:11.5px;font-weight:600;color:var(--mu);white-space:nowrap}
+/* grades table */
+.gwrap{overflow-x:auto;border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--bdl)}
+.gtbl{width:100%;border-collapse:collapse;background:#fff;font-size:13px;white-space:nowrap}
+.gtbl thead{position:sticky;top:0;z-index:10}
+.gtbl th{background:var(--g);color:#fff;padding:10px 13px;font-size:11px;font-weight:600;letter-spacing:.07em;text-align:center;border-right:1px solid rgba(255,255,255,.14)}
+.gtbl th:first-child{text-align:left;min-width:150px;position:sticky;left:0;z-index:11}
+.gtbl th:last-child{border-right:none}
+.gtbl td{padding:8px 13px;border-right:1px solid var(--bdl);border-bottom:1px solid var(--bdl);text-align:center;vertical-align:middle}
+.gtbl td:first-child{text-align:left;background:#fff;position:sticky;left:0;z-index:5;border-right:2px solid var(--bd);font-weight:500}
+.gtbl td:last-child{border-right:none}
+.gtbl tbody tr:nth-child(even) td{background:#f8fbfb}
+.gtbl tbody tr:nth-child(even) td:first-child{background:#f8fbfb}
+.gtbl tbody tr:hover td{background:var(--gp)}
+.gtbl tbody tr:hover td:first-child{background:var(--gp)}
+.sin{width:58px;padding:4px 6px;text-align:center;border:1.5px solid var(--bd);border-radius:4px;font-family:inherit;font-size:13px;color:var(--ink);background:#fff;outline:none;transition:border .15s}
+.sin:focus{border-color:var(--g);box-shadow:0 0 0 2px rgba(57,112,113,.1)}
+.sin.uns{border-color:var(--gold);background:var(--ybg)}
+.sin.svd{border-color:#52b788;background:#f0fff4}
+.sdsp{font-weight:600;padding:2px 8px;border-radius:4px;display:inline-block;min-width:40px}
+.sha{background:#e8f5ec;color:#2d6a4f}.shb{background:#edf2ff;color:#364fc7}.shc{background:#fff3cd;color:#7d5a00}.shd{background:var(--rbg);color:var(--red)}
+.sna{color:#ccc;font-size:11px}
+.savt{display:flex;align-items:center;gap:8px}
+.sav{width:26px;height:26px;border-radius:50%;background:var(--gp);border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gd);flex-shrink:0}
+/* data table */
+.dtbl{width:100%;border-collapse:collapse}
+.dtbl th{padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--mu);letter-spacing:.1em;border-bottom:2px solid var(--bdl);text-transform:uppercase}
+.dtbl td{padding:10px 14px;border-bottom:1px solid var(--bdl);font-size:13px;color:var(--ink);vertical-align:middle}
+.dtbl tbody tr:hover td{background:var(--gm)}
+.dtbl td:last-child{text-align:right}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;background:var(--gp);color:var(--gd);border:1px solid var(--bd);font-weight:500}
+.chipr{width:15px;height:15px;border-radius:50%;border:none;background:rgba(57,112,113,.18);color:var(--gd);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;padding:0}
+.chipr:hover{background:var(--red);color:#fff}
+.chipe{width:15px;height:15px;border-radius:50%;border:none;background:rgba(57,112,113,.18);color:var(--gd);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;padding:0}
+.chipe:hover{background:var(--g);color:#fff}
+/* stats */
+.strow{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-bottom:20px}
+.stc{background:#fff;border:1px solid var(--bdl);border-radius:var(--r);padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh)}
+.sti{width:40px;height:40px;border-radius:var(--rs);background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.stv{font-size:24px;font-weight:700;color:var(--gd);font-family:'Playfair Display',serif;line-height:1}
+.stl{font-size:11px;color:var(--mu);margin-top:2px}
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+
+/* ════ PRINT ════ */
+#prt{display:none}
+@media print{
+  body>*:not(#prt){display:none!important}
+  #prt{display:block!important}
+  @page{margin:12mm 14mm}
+}
+.prt-doc{font-family:'Noto Serif SC','DM Sans',serif;color:#1c2b2b}
+/* class print */
+.phd{display:flex;align-items:center;gap:16px;padding-bottom:12px;border-bottom:3px solid #397071;margin-bottom:14px}
+.plogo{width:52px;height:52px;border-radius:50%;border:2px solid #397071;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.pscn{font-family:'Noto Serif SC',serif;font-size:19px;font-weight:700;color:#397071;letter-spacing:.2em}
+.psen{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#7a9494;margin-top:3px;letter-spacing:.15em}
+.pdtitle{margin-left:auto;text-align:right}
+.pdtitle h2{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;color:#1c2b2b;letter-spacing:.15em}
+.pdtitle p{font-size:11px;color:#7a9494;margin-top:3px}
+.pmeta{display:flex;gap:18px;margin-bottom:12px;font-size:11px;color:#3a4f4f;background:#eaf3f3;padding:7px 12px;border-radius:4px}
+.pmeta span{font-weight:600;color:#397071}
+.ptbl{width:100%;border-collapse:collapse;font-size:10px;table-layout:auto}
+.ptbl th{background:#397071;color:#fff;padding:7px 6px;text-align:center;font-size:9.5px;font-weight:600;letter-spacing:.05em;border-right:1px solid rgba(255,255,255,.2)}
+.ptbl th.tl{text-align:left}.ptbl th:last-child{border-right:none}
+.ptbl td{padding:5px 6px;border-bottom:1px solid #e4eeee;border-right:1px solid #e4eeee;text-align:center;font-size:10px;vertical-align:middle}
+.ptbl td.tl{text-align:left;font-weight:600}.ptbl td:last-child{border-right:none}
+.ptbl tbody tr:nth-child(even) td{background:#f2f8f8}
+.pft{margin-top:16px;text-align:center;font-size:8.5px;color:#7a9494;border-top:1px solid #c8dede;padding-top:10px;letter-spacing:.12em}
+.pseq{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#397071;color:#fff;border-radius:50%;font-size:9px;font-weight:700}
+/* individual print */
+.sp-pg{position:relative;padding:22px;border:1px solid #c8dede;border-radius:4px;background:#fff;page-break-after:always;overflow:hidden}
+.sp-pg:last-child{page-break-after:avoid}
+.sp-wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-family:'Playfair Display',serif;font-size:68px;font-weight:700;color:rgba(57,112,113,.05);white-space:nowrap;pointer-events:none;letter-spacing:.2em}
+.sp-ctl{position:absolute;top:10px;left:10px;width:40px;height:40px;border-top:2px solid #397071;border-left:2px solid #397071;opacity:.4}
+.sp-cbr{position:absolute;bottom:10px;right:10px;width:40px;height:40px;border-bottom:2px solid #397071;border-right:2px solid #397071;opacity:.4}
+.sp-hd{display:flex;align-items:center;gap:14px;padding-bottom:13px;border-bottom:2.5px solid #397071;margin-bottom:16px;position:relative;z-index:1}
+.sp-crest{width:52px;height:52px;border-radius:50%;border:2px solid #397071;background:radial-gradient(circle at 40% 40%,#eaf3f3,#fff);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.sp-scn{font-family:'Noto Serif SC',serif;font-size:19px;font-weight:700;color:#397071;letter-spacing:.2em}
+.sp-sen{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#7a9494;letter-spacing:.15em;margin-top:4px}
+.sp-dblk{margin-left:auto;text-align:right}
+.sp-dcn{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:600;color:#1c2b2b;letter-spacing:.3em}
+.sp-den{font-family:'Playfair Display',serif;font-style:italic;font-size:10.5px;color:#7a9494;margin-top:3px}
+.sp-dyr{font-size:9.5px;color:#aaa;margin-top:5px;letter-spacing:.08em}
+.sp-dlbl{display:flex;align-items:center;gap:10px;margin:14px 0 10px;font-size:9.5px;font-weight:600;color:#397071;letter-spacing:.25em;text-transform:uppercase;position:relative;z-index:1}
+.sp-dlbl::before,.sp-dlbl::after{content:'';flex:1;height:1px}
+.sp-dlbl::before{background:linear-gradient(90deg,#397071,transparent)}
+.sp-dlbl::after{background:linear-gradient(270deg,#397071,transparent)}
+.sp-ig{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #c8dede;border-radius:4px;overflow:hidden;margin-bottom:16px;position:relative;z-index:1}
+.sp-ic{padding:8px 12px;border-right:1px solid #dde8e8;border-bottom:1px solid #dde8e8;display:flex;flex-direction:column;gap:2px}
+.sp-ic:nth-child(3n){border-right:none}
+.sp-ic:nth-last-child(-n+3){border-bottom:none}
+.sp-il{font-size:8.5px;color:#7a9494;letter-spacing:.15em;text-transform:uppercase;font-weight:600}
+.sp-iv{font-size:12px;color:#1c2b2b;font-weight:500;margin-top:1px}
+.sp-tbl{width:100%;border-collapse:collapse;font-size:12px;position:relative;z-index:1}
+.sp-tbl thead tr{background:#397071}
+.sp-tbl th{padding:8px 14px;color:#fff;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-align:left}
+.sp-tbl th:last-child{text-align:center;width:80px}
+.sp-tbl td{padding:7px 14px;border-bottom:1px solid #e4eeee;color:#1c2b2b;font-weight:500}
+.sp-tbl td:last-child{text-align:center;font-weight:700;font-size:14px}
+.sp-tbl tbody tr:nth-child(even) td{background:#f8fbfb}
+.sca{color:#2d6a4f}.scb{color:#364fc7}.scc{color:#7d5a00}.scd{color:#c0392b}
+.sp-ft{margin-top:18px;text-align:center;font-size:8px;color:#7a9494;border-top:1px solid #c8dede;padding-top:10px;letter-spacing:.12em;position:relative;z-index:1}
+</style>
+</head>
+<body>
+<div id="tw"></div>
+<script>
+const SB_URL='https://ivvivxcowzokjicfavbp.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2dml2eGNvd3pva2ppY2ZhdmJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NTA5NjksImV4cCI6MjA5NTMyNjk2OX0.Ub-lmWFkHtzPtfz_YY6KSJ3qrZrhD32D9PHeBhljdwE';
+</script>
+
+<!-- LOGIN -->
+<div id="pg-login">
+  <div class="lcard">
+    <div class="lhd">
+      <div class="lring">🌿</div>
+      <div class="lcn">优藤国际学校</div>
+      <div class="len">Ivy Youth Academy</div>
+      <div class="lsub">成绩管理系统 · Grade Management</div>
+    </div>
+    <div class="lbd" id="lbd"></div>
+    <div class="lft">© 优藤国际学校 · Ivy Youth Academy</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="pg-app" class="hidden">
+  <nav class="tnav">
+    <div class="tnl">优藤国际学校<small>Ivy Youth Academy · GMS</small></div>
+    <div class="ndv"></div>
+    <button class="ntb act" onclick="nav('grades',this)">📊 成绩录入</button>
+    <button class="ntb"     onclick="nav('students',this)">👤 学生管理</button>
+    <button class="ntb"     onclick="nav('subjects',this)">📚 科目配置</button>
+    <button class="ntb hidden" id="ntb-admin" onclick="nav('admin',this)">⚙️ 系统管理</button>
+    <div class="nusr">
+      <div class="uav" id="uav">?</div>
+      <span id="uname">—</span>
+      <button class="blg" onclick="logout()">退出</button>
+    </div>
+  </nav>
+  <div class="apc">
+
+    <!-- GRADES -->
+    <section class="ps act" id="ps-grades">
+      <div class="pgh">
+        <div><h2>成绩录入 / Grade Entry</h2><p id="gsub">请选择班级、学年和学期</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn bg2 bsm" onclick="doPrintClass()">🖨️ 打印全班成绩单</button>
+          <button class="btn bg2 bsm" onclick="doPrintIndividual()">📄 打印个人成绩单</button>
+          <button class="btn bp  bsm" onclick="saveAll()">💾 保存成绩</button>
+        </div>
+      </div>
+      <div class="fbar">
+        <span class="flbl">班级</span>
+        <select class="fi fs" id="sc-g" onchange="onClsG()" style="width:120px"><option value="">— 选择 —</option></select>
+        <div class="ndv"></div>
+        <span class="flbl">学年</span>
+        <select class="fi fs" id="sy-g" onchange="onSemG()" style="width:150px"><option value="">— 选择 —</option></select>
+        <span class="flbl">学期</span>
+        <select class="fi fs" id="ss-g" onchange="onSemG()" style="width:150px">
+          <option value="上学期">上学期（9月—1月）</option>
+          <option value="下学期">下学期（2月—7月）</option>
+        </select>
+        <div class="ndv"></div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mu);cursor:pointer">
+          <input type="checkbox" id="ck-ina" onchange="renderGT()"> 显示已离校
+        </label>
+      </div>
+      <div id="g-ph" style="text-align:center;padding:60px 20px;color:var(--mu)">
+        <div style="font-size:44px;margin-bottom:10px">📋</div>
+        <div style="font-size:13px">请选择班级、学年和学期以查看成绩表</div>
+      </div>
+      <div id="g-wrap" class="hidden">
+        <div class="gwrap">
+          <table class="gtbl"><thead id="g-th"></thead><tbody id="g-tb"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section class="ps" id="ps-students">
+      <div class="pgh">
+        <div><h2>学生管理 / Students</h2><p>转班/离校后历史成绩完整保留</p></div>
+        <button class="btn bp bsm" onclick="openAddStu()">＋ 添加学生</button>
+      </div>
+      <div class="fbar">
+        <span class="flbl">班级</span>
+        <select class="fi fs" id="sc-s" onchange="loadStuList()" style="width:120px"><option value="">— 选择 —</option></select>
+        <div class="ndv"></div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mu);cursor:pointer">
+          <input type="checkbox" id="ck-all-s" onchange="loadStuList()"> 显示已离校/转班
+        </label>
+      </div>
+      <div class="card">
+        <table class="dtbl">
+          <thead><tr>
+            <th>姓名</th><th>出生年月</th><th>性别</th><th>学号</th>
+            <th>入学日期</th><th>毕业日期</th><th>状态</th><th>操作</th>
+          </tr></thead>
+          <tbody id="stu-tb"><tr><td colspan="8" style="text-align:center;color:var(--mu);padding:36px">请选择班级</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SUBJECTS -->
+    <section class="ps" id="ps-subjects">
+      <div class="pgh">
+        <div><h2>科目配置 / Subjects</h2><p>每个班级 · 学年 · 学期的科目可完全独立配置</p></div>
+      </div>
+      <div class="fbar">
+        <span class="flbl">班级</span>
+        <select class="fi fs" id="sc-sub" onchange="onSubChg()" style="width:120px"><option value="">— 选择 —</option></select>
+        <div class="ndv"></div>
+        <span class="flbl">学年</span>
+        <select class="fi fs" id="sy-sub" onchange="onSubChg()" style="width:150px"><option value="">— 选择 —</option></select>
+        <span class="flbl">学期</span>
+        <select class="fi fs" id="ss-sub" onchange="onSubChg()" style="width:150px">
+          <option value="上学期">上学期（9月—1月）</option>
+          <option value="下学期">下学期（2月—7月）</option>
+        </select>
+      </div>
+      <div class="card" style="margin-bottom:18px">
+        <div class="ch">
+          <span style="font-size:17px">📚</span>
+          <span class="ct" id="sub-ct">科目列表</span>
+          <button class="btn bo bsm" style="margin-left:auto" onclick="openAddSub()">＋ 添加科目</button>
+        </div>
+        <div style="padding:20px" id="sub-body"><p style="color:var(--mu);font-size:13px">请先选择班级、学年和学期</p></div>
+      </div>
+      <div id="ss-sec" class="hidden">
+        <div class="pgh" style="margin-bottom:10px">
+          <div><h2 style="font-size:15px">学生选课配置</h2><p>勾选每位学生实际选修的科目</p></div>
+        </div>
+        <div class="card"><table class="dtbl">
+          <thead><tr id="ss-th"></tr></thead>
+          <tbody id="ss-tb"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ADMIN -->
+    <section class="ps" id="ps-admin">
+      <div class="pgh"><div><h2>系统管理 / Admin</h2><p>学年、班级与教师账号管理（仅管理员可见）</p></div></div>
+      <div id="adm-stats" class="strow"></div>
+      <div class="agrid">
+        <div class="card">
+          <div class="ch"><span>📅</span><span class="ct">学年管理</span>
+            <button class="btn bo bxs" style="margin-left:auto" onclick="openAddYear()">＋ 添加学年</button>
+          </div>
+          <div style="padding:0"><table class="dtbl">
+            <thead><tr><th>学年</th><th>操作</th></tr></thead>
+            <tbody id="yr-tb"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span>🏫</span><span class="ct">班级管理</span>
+            <button class="btn bo bxs" style="margin-left:auto" onclick="openAddCls()">＋ 添加班级</button>
+          </div>
+          <div style="padding:0"><table class="dtbl">
+            <thead><tr><th>班级</th><th>班主任</th><th>操作</th></tr></thead>
+            <tbody id="cls-tb"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span>👩‍🏫</span><span class="ct">教师账号</span>
+            <button class="btn bo bxs" style="margin-left:auto" onclick="openInvite()">＋ 创建账号</button>
+          </div>
+          <div style="padding:0"><table class="dtbl">
+            <thead><tr><th>姓名</th><th>邮箱</th><th>角色</th><th>操作</th></tr></thead>
+            <tbody id="tch-tb"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- PRINT AREA -->
+<div id="prt"></div>
+<div id="mwrap"></div>
+
+<script>
+/* ═══ STATE ═══ */
+let sb,me,myP;
+let classes=[],acYears=[],teachers=[];
+let subjects={};  // key cid|yr|sm
+let students={};  // key cid
+let gcache={};    // key cid|yr|sm
+let unsaved={};
+
+/* ═══ HELPERS ═══ */
+const fd=(y,m)=>!y?'—':m?`${y}年${m}月`:`${y}年`;
+const sk=(c,y,s)=>`${c}|${y}|${s}`;
+const scC=s=>s===null||s===undefined?'':s>=85?'sha':s>=70?'shb':s>=60?'shc':'shd';
+const scP=s=>s===null||s===undefined?'':s>=85?'sca':s>=70?'scb':s>=60?'scc':'scd';
+const moOpts=(v)=>Array.from({length:12},(_,i)=>`<option value="${i+1}"${v==i+1?'selected':''}>${i+1}月</option>`).join('');
+
+/* ═══ BOOT ═══ */
+async function boot(){
+  renderLoginForm();
+  try{
+    sb=supabase.createClient(SB_URL,SB_KEY);
+    const {data:{session}}=await sb.auth.getSession();
+    if(session) await onLogin(session.user);
+  }catch(e){
+    console.error(e);
+    document.getElementById('lbd').innerHTML=`
+      <div style="background:#fdf3f2;border:1.5px solid #e8b4b0;border-radius:6px;padding:16px;font-size:12.5px;color:#c0392b;line-height:1.8">
+        <strong>⚠ 数据库连接失败</strong><br>
+        请检查网络，或刷新页面重试。<br>
+        <button onclick="location.reload()" style="margin-top:8px;padding:5px 14px;background:#c0392b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px">重新加载</button>
+      </div>`;
+  }
+}
+
+function renderLoginForm(){
+  document.getElementById('lbd').innerHTML=`
+    <div class="fg"><label class="fl">邮箱地址</label>
+      <input class="fi" type="email" id="em" placeholder="teacher@ivyyouth.edu" autocomplete="email"></div>
+    <div class="fg"><label class="fl">密码</label>
+      <input class="fi" type="password" id="pw" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn bp" style="width:100%;justify-content:center;padding:11px" onclick="doLogin()">登 录</button>
+    <p id="lerr" style="color:var(--red);font-size:12px;text-align:center;display:none"></p>`;
+  document.getElementById('pw').onkeydown=e=>{if(e.key==='Enter')doLogin()};
+}
+
+async function doLogin(){
+  const email=document.getElementById('em').value.trim(),pass=document.getElementById('pw').value;
+  const err=document.getElementById('lerr');err.style.display='none';
+  if(!email||!pass){err.textContent='请填写邮箱和密码';err.style.display='block';return}
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){err.textContent='邮箱或密码错误';err.style.display='block';return}
+  await onLogin(data.user);
+}
+
+async function onLogin(user){
+  me=user;
+  const {data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  myP=p||{id:user.id,name:user.email,role:'teacher'};
+  document.getElementById('pg-login').classList.add('hidden');
+  document.getElementById('pg-app').classList.remove('hidden');
+  document.getElementById('uname').textContent=myP.name||user.email;
+  document.getElementById('uav').textContent=(myP.name||'T')[0].toUpperCase();
+  if(myP.role==='admin') document.getElementById('ntb-admin').classList.remove('hidden');
+  await loadAll();
+  toast('欢迎回来，'+(myP.name||'老师')+' 👋','ts');
+}
+
+async function logout(){await sb.auth.signOut();location.reload()}
+
+/* ═══ LOAD ═══ */
+async function loadAll(){
+  await Promise.all([loadClasses(),loadAcYears()]);
+  fillSels();
+  if(myP.role==='admin') loadAdminData();
+}
+
+async function loadClasses(){
+  let q=sb.from('classes').select('*,class_teachers(teacher_id,profiles(name))').order('name');
+  if(myP.role!=='admin'){
+    const {data:mine}=await sb.from('class_teachers').select('class_id').eq('teacher_id',me.id);
+    const ids=(mine||[]).map(r=>r.class_id);
+    if(!ids.length){classes=[];return}
+    q=q.in('id',ids);
+  }
+  const {data}=await q;classes=data||[];
+}
+
+async function loadAcYears(){
+  const {data}=await sb.from('academic_years').select('*').order('year_label',{ascending:false});
+  acYears=data||[];
+}
+
+function fillSels(){
+  ['sc-g','sc-s','sc-sub'].forEach(id=>{
+    const s=document.getElementById(id),v=s.value;
+    s.innerHTML='<option value="">— 选择 —</option>';
+    classes.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;s.appendChild(o)});
+    if(v) s.value=v;
+  });
+  ['sy-g','sy-sub'].forEach(id=>{
+    const s=document.getElementById(id),v=s.value;
+    s.innerHTML='<option value="">— 选择 —</option>';
+    acYears.forEach(y=>{const o=document.createElement('option');o.value=y.year_label;o.textContent=`${y.year_label} 学年`;s.appendChild(o)});
+    if(v) s.value=v;
+    else if(acYears.length) s.value=acYears[0].year_label;
+  });
+  const mo=new Date().getMonth()+1;
+  const dsm=mo>=9||mo===1?'上学期':'下学期';
+  ['ss-g','ss-sub'].forEach(id=>{const s=document.getElementById(id);if(!s.value)s.value=dsm});
+}
+
+/* ═══ GRADES ═══ */
+async function onClsG(){
+  const cid=document.getElementById('sc-g').value;if(!cid)return;
+  await loadStus(cid);await onSemG();
+}
+async function onSemG(){
+  const cid=document.getElementById('sc-g').value,yr=document.getElementById('sy-g').value,sm=document.getElementById('ss-g').value;
+  if(!cid||!yr)return;
+  await loadSubs(cid,yr,sm);await loadGrades(cid,yr,sm);renderGT();
+}
+async function loadSubs(cid,yr,sm){
+  const {data}=await sb.from('subjects').select('*').eq('class_id',cid).eq('academic_year',yr).eq('semester',sm).order('sort_order');
+  subjects[sk(cid,yr,sm)]=data||[];
+}
+async function loadStus(cid){
+  const {data}=await sb.from('enrollments').select('*,students(*)').eq('class_id',cid);
+  students[cid]=(data||[]).sort((a,b)=>(a.students?.name||'').localeCompare(b.students?.name||'','zh'));
+}
+async function loadGrades(cid,yr,sm){
+  const ids=(students[cid]||[]).map(e=>e.student_id);
+  if(!ids.length)return;
+  const {data}=await sb.from('grades').select('*').eq('class_id',cid).eq('academic_year',yr).eq('semester',sm).in('student_id',ids);
+  const key=sk(cid,yr,sm);gcache[key]={};
+  (data||[]).forEach(g=>{if(!gcache[key][g.student_id])gcache[key][g.student_id]={};gcache[key][g.student_id][g.subject_id]=g.score});
+}
+async function loadSSMap(cid,yr,sm){
+  const sbs=subjects[sk(cid,yr,sm)]||[];
+  if(!sbs.length)return{};
+  const {data}=await sb.from('student_subjects').select('student_id,subject_id').in('subject_id',sbs.map(s=>s.id));
+  const m={};(data||[]).forEach(r=>{if(!m[r.student_id])m[r.student_id]=new Set();m[r.student_id].add(r.subject_id)});
+  return m;
+}
+async function renderGT(){
+  const cid=document.getElementById('sc-g').value,yr=document.getElementById('sy-g').value,sm=document.getElementById('ss-g').value;
+  const showIna=document.getElementById('ck-ina').checked;
+  if(!cid||!yr){document.getElementById('g-ph').classList.remove('hidden');document.getElementById('g-wrap').classList.add('hidden');return}
+  const key=sk(cid,yr,sm);
+  const sbs=subjects[key]||[];
+  const enrs=(students[cid]||[]).filter(e=>showIna||e.status==='active');
+  const sg=gcache[key]||{};
+  const ssMap=await loadSSMap(cid,yr,sm);
+  const cls=classes.find(c=>c.id===cid);
+  document.getElementById('g-ph').classList.add('hidden');
+  document.getElementById('g-wrap').classList.remove('hidden');
+  document.getElementById('gsub').textContent=`${cls?.name||''} · ${yr} ${sm} · ${enrs.length} 名学生 · ${sbs.length} 门科目`;
+  document.getElementById('g-th').innerHTML=`<tr><th>学生姓名</th>${sbs.map(s=>`<th>${s.name}</th>`).join('')}</tr>`;
+  const tb=document.getElementById('g-tb');tb.innerHTML='';
+  enrs.forEach(enr=>{
+    const stu=enr.students,sg2=sg[stu.id]||{},ina=enr.status!=='active';
+    const tr=document.createElement('tr');
+    if(ina)tr.style.opacity='.7';
+    const stag=ina?` · <span class="tag ${enr.status==='transferred'?'tgo':'tr'}" style="padding:1px 6px;font-size:10px">${enr.status==='transferred'?'已转班':'已离校'}</span>`:'';
+    tr.innerHTML=`<td><div class="savt"><div class="sav">${stu.name[0]}</div><div>
+      <div style="font-weight:600;font-size:13px">${stu.name}</div>
+      <div style="font-size:11px;color:var(--mu)">${stu.student_no||''}${stag}</div>
+    </div></div></td>`;
+    sbs.forEach(sub=>{
+      const hasSub=ssMap[stu.id]?ssMap[stu.id].has(sub.id):true;
+      const td=document.createElement('td');
+      if(!hasSub){td.innerHTML='<span class="sna">—</span>'}
+      else{
+        const sc=sg2[sub.id];
+        if(!ina){
+          const inp=document.createElement('input');
+          inp.type='number';inp.min=0;inp.max=100;inp.className='sin';
+          inp.value=sc!==undefined&&sc!==null?sc:'';inp.placeholder='—';
+          inp.addEventListener('input',()=>{
+            inp.classList.add('uns');inp.classList.remove('svd');
+            unsaved[`${cid}|${yr}|${sm}|${stu.id}|${sub.id}`]={cid,yr,sm,sid:stu.id,bid:sub.id,score:inp.value===''?null:Number(inp.value)};
+          });
+          td.appendChild(inp);
+        }else{
+          td.innerHTML=`<span class="sdsp ${scC(sc)}">${sc!==undefined&&sc!==null?sc:'—'}</span>`;
+        }
+      }
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+}
+async function saveAll(){
+  const chg=Object.values(unsaved);
+  if(!chg.length){toast('没有待保存的更改','ti');return}
+  const {error}=await sb.from('grades').upsert(
+    chg.map(c=>({class_id:c.cid,academic_year:c.yr,semester:c.sm,student_id:c.sid,subject_id:c.bid,score:c.score,updated_at:new Date().toISOString()})),
+    {onConflict:'class_id,academic_year,semester,student_id,subject_id'}
+  );
+  if(error){toast('保存失败：'+error.message,'te');return}
+  const cid=document.getElementById('sc-g').value,yr=document.getElementById('sy-g').value,sm=document.getElementById('ss-g').value;
+  const key=sk(cid,yr,sm);if(!gcache[key])gcache[key]={};
+  chg.forEach(c=>{if(!gcache[key][c.sid])gcache[key][c.sid]={};gcache[key][c.sid][c.bid]=c.score});
+  unsaved={};
+  document.querySelectorAll('.sin.uns').forEach(el=>{el.classList.remove('uns');el.classList.add('svd')});
+  setTimeout(()=>document.querySelectorAll('.sin.svd').forEach(el=>el.classList.remove('svd')),2200);
+  toast(`已保存 ${chg.length} 条成绩 ✓`,'ts');
+}
+
+/* ═══ PRINT ═══ */
+async function getPD(){
+  const cid=document.getElementById('sc-g').value,yr=document.getElementById('sy-g').value,sm=document.getElementById('ss-g').value;
+  if(!cid||!yr){toast('请先在成绩录入页选择班级和学年','ti');return null}
+  const cls=classes.find(c=>c.id===cid);
+  const sbs=subjects[sk(cid,yr,sm)]||[];
+  const enrs=(students[cid]||[]).filter(e=>e.status==='active');
+  if(!sbs.length){toast('该学期暂无科目配置','ti');return null}
+  if(!enrs.length){toast('暂无在读学生','ti');return null}
+  const sg=gcache[sk(cid,yr,sm)]||{};
+  const ssMap=await loadSSMap(cid,yr,sm);
+  return{cls,yr,sm,sbs,enrs,sg,ssMap};
+}
+function setPrintPage(landscape){
+  let ps=document.getElementById('ps-tmp');if(ps)ps.remove();
+  ps=document.createElement('style');ps.id='ps-tmp';
+  ps.textContent=`@page{size:A4 ${landscape?'landscape':'portrait'}}`;
+  document.head.appendChild(ps);
+}
+async function doPrintClass(){
+  const d=await getPD();if(!d)return;
+  const{cls,yr,sm,sbs,enrs,sg,ssMap}=d;
+  setPrintPage(true);
+  const rows=enrs.map((enr,i)=>{
+    const s=enr.students,sg2=sg[s.id]||{};
+    const scs=sbs.map(sub=>{
+      if(!(ssMap[s.id]?ssMap[s.id].has(sub.id):true))return'<td style="color:#ccc">—</td>';
+      const v=sg2[sub.id];
+      const clr=v>=85?'#2d6a4f':v>=70?'#364fc7':v>=60?'#7d5a00':v!==undefined&&v!==null?'#c0392b':'';
+      return`<td style="font-weight:600;color:${clr}">${v!==undefined&&v!==null?v:''}</td>`;
+    }).join('');
+    return`<tr>
+      <td><div class="pseq">${i+1}</div></td>
+      <td class="tl">${s.name}</td>
+      <td>${fd(s.birth_year,s.birth_month)}</td>
+      <td>${s.gender==='M'?'男':s.gender==='F'?'女':'—'}</td>
+      <td style="font-size:9px;color:#666">${s.student_no||'—'}</td>
+      <td>${fd(s.entry_year,s.entry_month)}</td>
+      <td>${fd(s.grad_year,s.grad_month)}</td>
+      ${scs}</tr>`;
+  }).join('');
+  document.getElementById('prt').innerHTML=`<div class="prt-doc">
+    <div class="phd">
+      <div class="plogo">🌿</div>
+      <div><div class="pscn">优藤国际学校</div><div class="psen">Ivy Youth Academy</div></div>
+      <div class="pdtitle"><h2>班级成绩单</h2><p>Class Academic Transcript</p></div>
+    </div>
+    <div class="pmeta">
+      <div>班级：<span>${cls.name}</span></div>
+      <div>学年：<span>${yr}</span></div>
+      <div>学期：<span>${sm}</span></div>
+      <div>学生人数：<span>${enrs.length} 人</span></div>
+    </div>
+    <table class="ptbl">
+      <thead><tr>
+        <th style="width:26px">No.</th>
+        <th class="tl" style="min-width:65px">姓名</th>
+        <th>出生年月</th><th>性别</th><th>学号</th><th>入学日期</th><th>毕业日期</th>
+        ${sbs.map(s=>`<th>${s.name}</th>`).join('')}
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="pft">优藤国际学校 · Ivy Youth Academy · Official Academic Record · 本成绩单由学校教务系统出具，未经授权不得篡改</div>
+  </div>`;
+  window.print();
+  setTimeout(()=>{const s=document.getElementById('ps-tmp');if(s)s.remove()},800);
+}
+
+async function doPrintIndividual(){
+  const d=await getPD();if(!d)return;
+  const{cls,yr,sm,sbs,enrs,sg,ssMap}=d;
+  setPrintPage(false);
+  const pages=enrs.map(enr=>{
+    const s=enr.students,sg2=sg[s.id]||{};
+    const rows=sbs.map(sub=>{
+      if(!(ssMap[s.id]?ssMap[s.id].has(sub.id):true))return'';
+      const v=sg2[sub.id];
+      const disp=v!==undefined&&v!==null?v:'—';
+      return`<tr><td>${sub.name}</td><td class="${scP(v)}">${disp}</td></tr>`;
+    }).filter(Boolean).join('');
+    return`<div class="sp-pg">
+      <div class="sp-wm">IVY YOUTH ACADEMY</div>
+      <div class="sp-ctl"></div><div class="sp-cbr"></div>
+      <div class="sp-hd">
+        <div class="sp-crest">🌿</div>
+        <div><div class="sp-scn">优藤国际学校</div><div class="sp-sen">Ivy Youth Academy</div></div>
+        <div class="sp-dblk">
+          <div class="sp-dcn">学生成绩单</div>
+          <div class="sp-den">Academic Transcript</div>
+          <div class="sp-dyr">${yr} &nbsp;·&nbsp; ${sm}</div>
+        </div>
+      </div>
+      <div class="sp-dlbl">学生信息 · Student Information</div>
+      <div class="sp-ig">
+        <div class="sp-ic"><div class="sp-il">姓名 Name</div><div class="sp-iv">${s.name}</div></div>
+        <div class="sp-ic"><div class="sp-il">性别 Gender</div><div class="sp-iv">${s.gender==='M'?'男 Male':s.gender==='F'?'女 Female':'—'}</div></div>
+        <div class="sp-ic"><div class="sp-il">学号 Student No.</div><div class="sp-iv">${s.student_no||'—'}</div></div>
+        <div class="sp-ic"><div class="sp-il">出生年月 Date of Birth</div><div class="sp-iv">${fd(s.birth_year,s.birth_month)}</div></div>
+        <div class="sp-ic"><div class="sp-il">入学日期 Entry Date</div><div class="sp-iv">${fd(s.entry_year,s.entry_month)}</div></div>
+        <div class="sp-ic"><div class="sp-il">毕业日期 Graduation</div><div class="sp-iv">${fd(s.grad_year,s.grad_month)}</div></div>
+        <div class="sp-ic"><div class="sp-il">班级 Class</div><div class="sp-iv">${cls.name}</div></div>
+        <div class="sp-ic"><div class="sp-il">学年 Academic Year</div><div class="sp-iv">${yr}</div></div>
+        <div class="sp-ic"><div class="sp-il">学期 Semester</div><div class="sp-iv">${sm}</div></div>
+      </div>
+      <div class="sp-dlbl">学科成绩 · Academic Scores</div>
+      <table class="sp-tbl">
+        <thead><tr><th>科目 Subject</th><th>成绩 Score</th></tr></thead>
+        <tbody>${rows||'<tr><td colspan="2" style="text-align:center;color:#aaa;padding:20px">暂无成绩记录</td></tr>'}</tbody>
+      </table>
+      <div class="sp-ft">
+        优藤国际学校 · Ivy Youth Academy · Official Academic Record<br>
+        本成绩单由学校教务系统出具，具有正式效力，未经授权不得篡改
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('prt').innerHTML=`<div class="prt-doc">${pages}</div>`;
+  window.print();
+  setTimeout(()=>{const s=document.getElementById('ps-tmp');if(s)s.remove()},800);
+}
+
+/* ═══ STUDENTS ═══ */
+async function loadStuList(){
+  const cid=document.getElementById('sc-s').value;if(!cid)return;
+  await loadStus(cid);
+  const showAll=document.getElementById('ck-all-s').checked;
+  const list=(students[cid]||[]).filter(e=>showAll||e.status==='active');
+  const tb=document.getElementById('stu-tb');tb.innerHTML='';
+  if(!list.length){tb.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--mu);padding:30px">暂无学生记录</td></tr>`;return}
+  list.forEach(enr=>{
+    const s=enr.students;
+    const st=enr.status==='active'?`<span class="tag tg">在读</span>`:enr.status==='transferred'?`<span class="tag tgo">已转班</span>`:`<span class="tag tr">已离校</span>`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><strong>${s.name}</strong></td>
+      <td>${fd(s.birth_year,s.birth_month)}</td>
+      <td>${s.gender==='M'?'男':s.gender==='F'?'女':'—'}</td>
+      <td style="font-size:12px;color:var(--mu)">${s.student_no||'—'}</td>
+      <td>${fd(s.entry_year,s.entry_month)}</td>
+      <td>${fd(s.grad_year,s.grad_month)}</td>
+      <td>${st}</td>
+      <td><div style="display:flex;gap:5px;justify-content:flex-end">
+        <button class="btn bg2 bxs" onclick="openEditStu('${s.id}')">编辑</button>
+        ${enr.status==='active'?`<button class="btn bg2 bxs" onclick="openTransfer('${enr.id}','${s.name}')">转班</button>
+          <button class="btn bd2 bxs" onclick="setStuSt('${enr.id}','left','${s.name}')">离校</button>`:''}
+        ${enr.status!=='active'?`<button class="btn bo bxs" onclick="setStuSt('${enr.id}','active','${s.name}')">恢复</button>`:''}
+      </div></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function stuForm(s){
+  s=s||{};
+  return`
+    <div class="fg"><label class="fl">姓名 *</label><input class="fi" id="m-n" value="${s.name||''}" placeholder="学生姓名"></div>
+    <div class="g2">
+      <div class="fg"><label class="fl">学号</label><input class="fi" id="m-sno" value="${s.student_no||''}" placeholder="IVA2024001"></div>
+      <div class="fg"><label class="fl">性别</label><select class="fi fs" id="m-g">
+        <option value="">—</option>
+        <option value="M"${s.gender==='M'?' selected':''}>男</option>
+        <option value="F"${s.gender==='F'?' selected':''}>女</option>
+      </select></div>
+    </div>
+    <p class="fl" style="margin-top:4px">出生年月</p>
+    <div class="g2">
+      <div class="fg"><label class="fl">年</label><input class="fi" id="m-by" type="number" value="${s.birth_year||''}" placeholder="2008"></div>
+      <div class="fg"><label class="fl">月</label><select class="fi fs" id="m-bm"><option value="">—</option>${moOpts(s.birth_month)}</select></div>
+    </div>
+    <p class="fl" style="margin-top:4px">入学日期</p>
+    <div class="g2">
+      <div class="fg"><label class="fl">年</label><input class="fi" id="m-ey" type="number" value="${s.entry_year||''}" placeholder="2024"></div>
+      <div class="fg"><label class="fl">月</label><select class="fi fs" id="m-em"><option value="">—</option>${moOpts(s.entry_month)}</select></div>
+    </div>
+    <p class="fl" style="margin-top:4px">毕业日期（可留空）</p>
+    <div class="g2">
+      <div class="fg"><label class="fl">年</label><input class="fi" id="m-gy" type="number" value="${s.grad_year||''}" placeholder="2027"></div>
+      <div class="fg"><label class="fl">月</label><select class="fi fs" id="m-gm"><option value="">—</option>${moOpts(s.grad_month)}</select></div>
+    </div>`;
+}
+
+function gStuP(name){
+  return{name,
+    student_no:document.getElementById('m-sno').value.trim()||null,
+    gender:document.getElementById('m-g').value||null,
+    birth_year:document.getElementById('m-by').value||null,
+    birth_month:document.getElementById('m-bm').value||null,
+    entry_year:document.getElementById('m-ey').value||null,
+    entry_month:document.getElementById('m-em').value||null,
+    grad_year:document.getElementById('m-gy').value||null,
+    grad_month:document.getElementById('m-gm').value||null
+  };
+}
+
+function openAddStu(){
+  const cid=document.getElementById('sc-s').value;
+  if(!cid){toast('请先选择班级','ti');return}
+  modal(`<div class="mh"><span class="mtt">添加学生</span><button class="mc" onclick="closeM()">×</button></div>
+    <div class="mb">${stuForm()}</div>
+    <div class="mf"><button class="btn bg2" onclick="closeM()">取消</button>
+      <button class="btn bp" onclick="addStu('${cid}')">确认添加</button></div>`);
+}
+
+function openEditStu(stuId){
+  const allE=Object.values(students).flat();
+  const enr=allE.find(e=>e.students?.id===stuId);
+  if(!enr)return;
+  const s=enr.students;
+  modal(`<div class="mh"><span class="mtt">编辑学生信息</span><button class="mc" onclick="closeM()">×</button></div>
+    <div class="mb">${stuForm(s)}</div>
+    <div class="mf"><button class="btn bg2" onclick="closeM()">取消</button>
+      <button class="btn bp" onclick="editStu('${stuId}')">保存</button></div>`);
+}
+
+async function addStu(cid){
+  const name=document.getElementById('m-n').value.trim();
+  if(!name){toast('请填写姓名','te');return}
+  const {data:stu,error}=await sb.from('students').insert(gStuP(name)).select().single();
+  if(error){toast('添加失败: '+error.message,'te');return}
+  await sb.from('enrollments').insert({student_id:stu.id,class_id:cid,status:'active'});
+  toast(`已添加「${name}」✓`,'ts');closeM();loadStuList();
+}
+
+async function editStu(stuId){
+  const name=document.getElementById('m-n').value.trim();
+  if(!name){toast('请填写姓名','te');return}
+  const {error}=await sb.from('students').update(gStuP(name)).eq('id',stuId);
+  if(error){toast('保存失败','te');return}
+  toast('已保存 ✓','ts');closeM();loadStuList();
+}
+
+async function setStuSt(eid,st,name){
+  if(!confirm(`确认将「${name}」改为${st==='left'?'离校':'恢复在读'}？`))return;
+  await sb.from('enrollments').update({status:st}).eq('id',eid);
+  toast(`已更新「${name}」✓`,'ts');loadStuList();
+}
+
+function openTransfer(eid,name){
+  modal(`<div class="mh"><span class="mtt">转班 — ${name}</span><button class="mc" onclick="closeM()">×</button></div>
+    <div class="mb">
+      <p style="font-size:12.5px;color:var(--mu)">转班后，原班级历史成绩完整保留。</p>
+      <div class="fg"><label class="fl">转入班级 *</label><select class="fi fs" id="m-tc">
+        <option value="">— 选择目标班级 —</option>
+        ${classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+      </select></div>
+    </div>
+    <div class="mf"><button class="btn bg2" onclick="closeM()">取消</button>
+      <button class="btn bp" onclick="doTransfer('${eid}','${name}')">确认转班</button></div>`);
+}
+
+async function doTransfer(eid,name){
+  const ncid=document.getElementById('m-tc').value;
+  if(!ncid){toast('请选择目标班级','te');return}
+  const {data:enr}=await sb.from('enrollments').select('student_id').eq('id',eid).single();
+  await sb.from('enrollments').update({status:'transferred'}).eq('id',eid);
+  await sb.from('enrollments').insert({student_id:enr.student_id,class_id:ncid,status:'active'});
+  toast(`「${name}」已转班 ✓`,'ts');closeM();loadStuList();
+}
+
+/* ═══ SUBJECTS ═══ */
+async function onSubChg(){
+  const cid=document.getElementById('sc-sub').value,yr=document.getElementById('sy-sub').value,sm=document.getElementById('ss-sub').value;
+  if(!cid||!yr)return;
+  await loadSubs(cid,yr,sm);await loadStus(cid);
+  renderSubCfg(cid,yr,sm);
+}
+
+async function renderSubCfg(cid,yr,sm){
+  const key=sk(cid,yr,sm),sbs=subjects[key]||[];
+  const cls=classes.find(c=>c.id===cid);
+  document.getElementById('sub-ct').textContent=`${cls?.name||''} · ${yr} ${sm} · ${sbs.length} 门科目`;
+  document.getElementById('sub-body').innerHTML=sbs.length
+    ?`<div class="chips">${sbs.map(s=>`<div class="chip">
+        <button class="chipe" onclick="openEditSub('${s.id}','${s.name.replace(/'/g,'\\\'')}')" title="修改名称">✎</button>
+        ${s.name}
+        <button class="chipr" onclick="rmSub('${s.id}','${s.name.replace(/'/g,'\\\'\')}')">×</button>
+      </div>`).join('')}</div>`
+    :`<p style="color:var(--mu);font-size:13px">暂无科目，点击「添加科目」开始配置</p>`;
+
+  document.getElementById('ss-sec').classList.remove('hidden');
+  const actStus=(students[cid]||[]).filter(e=>e.status==='active');
+  const ssMap=await loadSSMap(cid,yr,sm);
+  document.getElementById('ss-th').innerHTML=`<th>学生</th>${sbs.map(s=>`<th style="text-align:center;font-size:11px">${s.name}</th>`).join('')}`;
+  const tb=document.getElementById('ss-tb');tb.innerHTML='';
+  actStus.forEach(enr=>{
+    const stu=enr.students,tr=document.createElement('tr');
+    let cells=`<td><strong>${stu.name}</strong></td>`;
+    sbs.forEach(sub=>{
+      const ck=ssMap[stu.id]?.has(sub.id)??true;
+      cells+=`<td style="text-align:center"><input type="checkbox"${ck?' checked':''} style="width:15px;height:15px;accent-color:var(--g);cursor:pointer"
+        onchange="toggleSS('${stu.id}','${sub.id}','${cid}',this.checked)"></td>`;
+    });
+    tr.innerHTML=cells;tb.appendChild(tr);
+  });
+}
+
+async function toggleSS(sid,bid,cid,ck){
+  if(ck) await sb.from('student_subjects').upsert({student_id:sid,subject_id:bid,class_id:cid},{onConflict:'student_id,subject_id'});
+  else   await sb.from('student_subjects').delete().eq('student_id',sid).eq('subject_id',bid);
+}
+
+function openAddSub(){
+  const cid=document.getElementById('sc-sub').value,yr=document.getElementById('sy-sub').value,sm=document.getElementById('ss-sub').value;
+  if(!cid||!yr){toast('请先选择班级和学年','ti');return}
+  modal(`<div class="mh"><span class="mtt">添加科目</span><button class="mc" onclick="closeM()">×</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">科目名称 *</label>
+        <input class="fi" id="m-sn" placeholder="如：SAT数学、AP物理、英语听力"></div>
+      <p style="font-size:12px;color:var(--mu)">添加后默认所有在读学生均选修此科目，可在下方学生选课配置中单独调整。</p>
+    </div>
+    <div class="mf"><button class="btn bg2" onclick="closeM()">取消</button>
+      <button class="btn bp" onclick="addSub('${cid}','${yr}','${sm}')">添加</button></div>`);
+}
+
+function openEditSub(bid,oldName){
+  modal(`<div class="mh"><span class="mtt">修改科目名称</span><button class="mc" onclick="closeM()">×</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">科目名称 *</label><input class="fi" id="m-en" value="${oldName}"></div>
+    </div>
+    <div class="mf"><button class="btn bg2" onclick="closeM()">取消</button>
+      <button class="btn bp" onclick="editSub('${bid}')">保存</button></div>`);
+}
+
+async function editSub(bid){
+  const name=document.getElementById('m-en').value.trim();
+  if(!name){toast('请填写科目名称','te');return}
+  await sb.from('subjects').update({name}).eq('id',bid);
+  toast('科目名称已更新 ✓','ts');closeM();onSubChg();
+  const cid=document.getElementById('sc-g').value,yr=document.getElementById('sy-g').value,sm=document.getElementById('ss-g').value;
+  if(cid&&yr){await loadSubs(cid,yr,sm);renderGT();}
+}
+
+async function addSub(cid,yr,sm){
+  const name=document.getElementById('m-sn').value.trim();
+  if(!name){toast('请填写科目名称','te');return}
+  const key=sk(cid,yr,sm),so=(subjects[key]||[]).length;
+  const {data:sub,error}=await sb.from('subjects').insert({class_id:cid,name,sort_order:so,academic_year:yr,semester:sm}).select().single();
+  if(error){toast('添加失败: '+error.message,'te');return}
+  const actStus=(students[cid]||[]).filter(e=>e.status==='active');
+  if(actStus.length) await sb.from('student_subjects').upsert(
+    actStus.map(e=>({student_id:e.student_id,subject_id:sub.id,class_id:cid})),{onConflict:'student_id,subject_id'});
+  toast(`科目「${name}」已添加 ✓`,'ts');closeM();onSubChg();
+}
+
+async function rmSub(bid,name){
+  if(!confirm(`确认删除科目「${name}」？相关成绩数据将一同删除。`))return;
+  await sb.from('grades').delete().eq('subject_id',bid);
+  await sb.from('student_subjects').delete().eq('subject_id',bid);
+  await sb.from('subjects').delete().eq('id',bid);
+  toast(`已删除「${name}」`,'ts');onSubChg();
+}
+
+/* ═══ ADMIN ═══ */
+async function loadAdminData(){
+  const [r1,r2,r3]=await Promise.all([
+    sb.from('classes').select('*',{count:'exact',head:true}),
+    sb.from('students').select('*',{count:'exact',head:true}),
+    sb.from('profiles').select('*',{count:'exact',head:true})
+  ]);
+  document.getElementById('adm-stats').innerHTML=`
+    <div class="stc"><div class="sti">📅</div><div><div class="stv">${acYears.length}</div><div class="stl">学年数</div></div></div>
+    <div class="stc"><div class="sti">🏫</div><div><div class="stv">${r1.count||0}</div><div class="stl">班级数</div></div></div>
+    <div class="stc"><div class="sti">👤</div><div><div class="stv">${r2.count||0}</div><div class="stl">学生总数</div></div></div>
+    <div class="stc"><div class="sti">👩‍🏫</div><div><div class="stv">${r3.count||0}</div><div class="stl">教职账号</div></div></div>`;
+
+  // years
+  const ytb=document.getElementById('yr-tb');ytb.innerHTML='';
+  acYears.forEach(y=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${y.year_label}</strong> 学年</td>
+      <td><button class="btn bd2 bxs" onclick="delYear('${y.id}','${y.year_label}')">删除</button></td>`;
+    ytb.appendChild(tr);
+  });
+
+  // classes
+  const {data:cls}=await sb.from('classes').select('*,class_teachers(teacher_id,profiles(name))').order('name');
+  const ctb=document.getElementById('cls-tb');ctb.innerHTML='';
+  (cls||[]).forEach(c=>{
+    const tn=c.class_teachers?.[0]?.profiles?.name||'—';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${c.name}</strong></td><td style="font-size:12px;color:var(--mu)">${tn}</td>
+      <td><div style="display:flex;gap:5px;justify-content:flex-end">
+        <button class="btn bg2 bxs" onclick="openAssign('${c.id}','${c.name}')">换班主任</button>
+        <button class="btn bd2 bxs" onclick="delCls('${c.id}','${c.name}')">删除</button>
+      </div></td>`;
+    ctb.appendChild(tr);
+  });
+
+  // teachers
+  const {data:tchs}=await sb.from('profiles').select('*').order('name');
+  teachers=tchs||[];
+  const ttb=document.getElementById('tch-tb');ttb.innerHTML='';
+  teachers.forEach(t=>{
+    const rt=t.role==='admin'?`<span class="tag tgo">管理员</span>`:`<span class="tag tg">班主任</span>`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${t.name||'—'}</strong></td>
+      <td style="font-size:11.5px;color:var(--mu)">${t.email||''}</td><td>${rt}</td>
+      <td><button class="btn bd2 bxs" onclick="delTch('${t.id}','${t.name||t.email}')">移除</button></td>`;
+    ttb.appendChild(tr);
+  });
+}
+
+function openAddYear(){
+  modal(`<div class="mh"><span class="mtt">添加学年</span><button class="mc" onclick="closeM()">×</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">学年 *</label>
+        <input class="fi" id="m-yr" placeholder="如：2026-2027">
+        <p style="font-size:11px;color:var(--mu);margin-top:4px">格式：起始年-结束年，例如 2026-2027</p>
+      </div>
+    </div>
+    <div class="mf"><button class="btn bg2" onclick="closeM()">取消</button>
+      <button class="btn bp" onclick="addYear()">添加</button></div>`);
+}
+async function addYear(){
+  const label=document.getElementById('m-yr').value.trim();
+  if(!label){toast('请填写学年','te');return}
+  const {error}=await sb.from('academic_years').insert({year_label:label});
+  if(error){toast('添加失败（该学年可能已存在）','te');return}
+  toast(`学年「${label}」已添加 ✓`,'ts');closeM();
+  await loadAcYears();fillSels();loadAdminData();
+}
+async function delYear(id,label){
+  if(!confirm(`确认删除学年「${label}」？`))return;
+  await sb.from('academic_years').delete().eq('id',id);
+  toast(`学年「${label}」已删除`,'ts');
+  await loadAcYears();fillSels();loadAdminData();
+}
+
+function openAddCls(){
+  modal(`<div class="mh"><span class="mtt">添加班级</span><button class="mc" onclick="closeM()">×</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">班级名称 *</label><input class="fi" id="m-cn" placeholder="如：2405、高一(3)班"></div>
+    </div>
+    <div class="mf"><button class="btn bg2" onclick="closeM()">取消</button>
+      <button class="btn bp" onclick="addCls()">确认</button></div>`);
+}
+async function addCls(){
+  const name=document.getElementById('m-cn').value.trim();
+  if(!name){toast('请填写班级名称','te');return}
+  const {error}=await sb.from('classes').insert({name});
+  if(error){toast('添加失败','te');return}
+  toast(`班级「${name}」已创建 ✓`,'ts');closeM();
+  await loadClasses();fillSels();loadAdminData();
+}
+async function delCls(cid,name){
+  if(!confirm(`确认删除班级「${name}」？所有相关数据将被清除，此操作不可恢复。`))return;
+  await sb.from('grades').delete().eq('class_id',cid);
+  await sb.from('subjects').delete().eq('class_id',cid);
+  await sb.from('enrollments').delete().eq('class_id',cid);
+  await sb.from('class_teachers').delete().eq('class_id',cid);
+  await sb.from('classes').delete().eq('id',cid);
+  toast(`班级「${name}」已删除`,'ts');await loadClasses();fillSels();loadAdminData();
+}
+function openAssign(cid,cname){
+  modal(`<div class="mh"><span class="mtt">更换班主任 — ${cname}</span><button class="mc" onclick="closeM()">×</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">新班主任</label><select class="fi fs" id="m-at">
+        <option value="">— 选择教师 —</option>
+        ${teachers.map(t=>`<option value="${t.id}">${t.name||t.email}</option>`).join('')}
+      </select></div>
+    </div>
+    <div class="mf"><button class="btn bg2" onclick="closeM()">取消</button>
+      <button class="btn bp" onclick="doAssign('${cid}')">确认</button></div>`);
+}
+async function doAssign(cid){
+  const tid=document.getElementById('m-at').value;
+  if(!tid){toast('请选择教师','te');return}
+  await sb.from('class_teachers').delete().eq('class_id',cid);
+  await sb.from('class_teachers').insert({class_id:cid,teacher_id:tid});
+  toast('班主任已更新 ✓','ts');closeM();loadAdminData();
+}
+function openInvite(){
+  modal(`<div class="mh"><span class="mtt">创建教师账号</span><button class="mc" onclick="closeM()">×</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">教师姓名 *</label><input class="fi" id="m-in" placeholder="如：王晓燕"></div>
+      <div class="fg"><label class="fl">邮箱 *</label><input class="fi" id="m-ie" type="email" placeholder="teacher@ivyyouth.edu"></div>
+      <div class="fg"><label class="fl">初始密码 *</label><input class="fi" id="m-ip" type="password" placeholder="至少6位字符"></div>
+      <div class="fg"><label class="fl">角色</label><select class="fi fs" id="m-ir">
+        <option value="teacher">班主任</option><option value="admin">管理员</option>
+      </select></div>
+    </div>
+    <div class="mf"><button class="btn bg2" onclick="closeM()">取消</button>
+      <button class="btn bp" onclick="doInvite()">创建账号</button></div>`);
+}
+async function doInvite(){
+  const name=document.getElementById('m-in').value.trim(),email=document.getElementById('m-ie').value.trim(),pass=document.getElementById('m-ip').value,role=document.getElementById('m-ir').value;
+  if(!name||!email||!pass){toast('请填写所有必填项','te');return}
+  if(pass.length<6){toast('密码至少6位','te');return}
+  const {data,error}=await sb.auth.signUp({email,password:pass});
+  if(error){toast('创建失败: '+error.message,'te');return}
+  if(data.user) await sb.from('profiles').upsert({id:data.user.id,name,email,role});
+  toast(`账号「${name}」已创建 ✓`,'ts');closeM();loadAdminData();
+}
+async function delTch(id,name){
+  if(!confirm(`确认移除「${name}」的账号？`))return;
+  await sb.from('profiles').delete().eq('id',id);
+  toast(`账号「${name}」已移除`,'ts');loadAdminData();
+}
+
+/* ═══ NAV / MODAL / TOAST ═══ */
+function nav(name,btn){
+  document.querySelectorAll('.ps').forEach(s=>s.classList.remove('act'));
+  document.querySelectorAll('.ntb').forEach(b=>b.classList.remove('act'));
+  document.getElementById('ps-'+name).classList.add('act');
+  btn.classList.add('act');
+}
+function modal(html){
+  document.getElementById('mwrap').innerHTML=`
+    <div class="mbk" onclick="if(event.target===this)closeM()">
+      <div class="modal">${html}</div>
+    </div>`;
+}
+function closeM(){document.getElementById('mwrap').innerHTML=''}
+function toast(msg,cls='ti'){
+  const el=document.createElement('div');el.className=`toast ${cls}`;el.textContent=msg;
+  document.getElementById('tw').appendChild(el);
+  setTimeout(()=>el.remove(),3200);
+}
+
+boot();
+</script>
+</body>
+</html>
